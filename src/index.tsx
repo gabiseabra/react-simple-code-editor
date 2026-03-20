@@ -123,13 +123,18 @@ const Editor = React.forwardRef(function Editor(
     readOnly,
     required,
     style,
-    styles = defaultStyles,
+    styles: styleOverrides,
     tabSize = 2,
     textareaClassName,
     textareaId,
     value,
     ...rest
   } = props;
+
+  const styles = {
+    ...styleOverrides,
+    ...defaultStyles,
+  };
 
   const historyRef = React.useRef<History>({
     stack: [],
@@ -598,7 +603,7 @@ type Styles = {
   editor?: React.CSSProperties;
 };
 
-const defaultStyles: Styles = {
+export const defaultStyles: Styles = {
   container: {
     position: 'relative',
     textAlign: 'left',
