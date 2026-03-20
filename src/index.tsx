@@ -12,12 +12,13 @@ export type CodeEditorProps = React.HTMLAttributes<HTMLDivElement> & {
   highlight: (value: string) => string | React.ReactNode;
   ignoreTabKey?: boolean;
   insertSpaces?: boolean;
-  onValueChange: (value: string) => void;
+  onValueChange?: (value: string) => void;
   padding?: Padding<number | string>;
   style?: React.CSSProperties;
   styles?: Styles;
   tabSize?: number;
-  value: string;
+  value?: string;
+  initialValue?: string;
 
   // Props for the textarea
   autoFocus?: boolean;
@@ -107,6 +108,8 @@ export const CodeEditor = React.forwardRef(function Editor(
   ref: React.Ref<CodeEditorRef>
 ) {
   const {
+    value: controlledValue,
+    initialValue,
     autoFocus,
     disabled,
     form,
@@ -132,7 +135,6 @@ export const CodeEditor = React.forwardRef(function Editor(
     tabSize = 2,
     textareaClassName,
     textareaId,
-    value,
     ...rest
   } = props;
 
@@ -146,6 +148,8 @@ export const CodeEditor = React.forwardRef(function Editor(
     offset: -1,
   });
   const inputRef = React.useRef<HTMLTextAreaElement | null>(null);
+  const [internalValue, setInternalValue] = React.useState(initialValue ?? '');
+  const value = controlledValue ?? internalValue;
   const [capture, setCapture] = React.useState(true);
   const contentStyle = {
     paddingTop: typeof padding === 'object' ? padding.top : padding,
@@ -247,6 +251,7 @@ export const CodeEditor = React.forwardRef(function Editor(
     input.selectionEnd = record.selectionEnd;
 
     onValueChange?.(record.value);
+    setInternalValue(record.value);
   };
 
   const applyEdits = (record: CodeEditorRecord) => {
@@ -528,7 +533,8 @@ export const CodeEditor = React.forwardRef(function Editor(
       true
     );
 
-    onValueChange(value);
+    onValueChange?.(value);
+    setInternalValue(value);
   };
 
   React.useEffect(() => {
