@@ -2,7 +2,12 @@ import * as React from 'react';
 
 type Padding<T> = T | { top?: T; right?: T; bottom?: T; left?: T };
 
-type Props = React.HTMLAttributes<HTMLDivElement> & {
+export type CodeEditorRef = {
+  session: { history: CodeEditorHistory };
+  selection: { start: number; end: number } | null;
+};
+
+export type CodeEditorProps = React.HTMLAttributes<HTMLDivElement> & {
   // Props for the component
   highlight: (value: string) => string | React.ReactNode;
   ignoreTabKey?: boolean;
@@ -36,14 +41,14 @@ type Props = React.HTMLAttributes<HTMLDivElement> & {
   preClassName?: string;
 };
 
-type Record = {
+export type CodeEditorRecord = {
   value: string;
   selectionStart: number;
   selectionEnd: number;
 };
 
-type History = {
-  stack: (Record & { timestamp: number })[];
+export type CodeEditorHistory = {
+  stack: (CodeEditorRecord & { timestamp: number })[];
   offset: number;
 };
 
@@ -97,9 +102,9 @@ const cssText = /* CSS */ `
 }
 `;
 
-const Editor = React.forwardRef(function Editor(
-  props: Props,
-  ref: React.Ref<null | { session: { history: History } }>
+export const CodeEditor = React.forwardRef(function Editor(
+  props: CodeEditorProps,
+  ref: React.Ref<CodeEditorRef>
 ) {
   const {
     autoFocus,
@@ -136,7 +141,7 @@ const Editor = React.forwardRef(function Editor(
     ...styleOverrides,
   };
 
-  const historyRef = React.useRef<History>({
+  const historyRef = React.useRef<CodeEditorHistory>({
     stack: [],
     offset: -1,
   });
@@ -154,7 +159,7 @@ const Editor = React.forwardRef(function Editor(
     text.substring(0, position).split('\n');
 
   const recordChange = React.useCallback(
-    (record: Record, overwrite: boolean = false) => {
+    (record: CodeEditorRecord, overwrite: boolean = false) => {
       const { stack, offset } = historyRef.current;
 
       if (stack.length && offset > -1) {
@@ -231,7 +236,7 @@ const Editor = React.forwardRef(function Editor(
     });
   }, [recordChange]);
 
-  const updateInput = (record: Record) => {
+  const updateInput = (record: CodeEditorRecord) => {
     const input = inputRef.current;
 
     if (!input) return;
@@ -244,7 +249,7 @@ const Editor = React.forwardRef(function Editor(
     onValueChange?.(record.value);
   };
 
-  const applyEdits = (record: Record) => {
+  const applyEdits = (record: CodeEditorRecord) => {
     // Save last selection state
     const input = inputRef.current;
     const last = historyRef.current.stack[historyRef.current.offset];
@@ -539,8 +544,22 @@ const Editor = React.forwardRef(function Editor(
             history: historyRef.current,
           };
         },
-        set session(session: { history: History }) {
+        set session(session: { history: CodeEditorHistory }) {
           historyRef.current = session.history;
+        },
+
+        get selection() {
+          if (!inputRef.current || inputRef.current.selectionStart === null)
+            return null;
+          const start = inputRef.current.selectionStart;
+          const end = inputRef.current.selectionEnd ?? start;
+          return { start, end };
+        },
+        set selection(selection) {
+          if (!inputRef.current) return;
+          if (selection) {
+            inputRef.current.setSelectionRange(selection.start, selection.end);
+          }
         },
       };
     },
@@ -651,4 +670,4 @@ export const defaultStyles: Styles = {
   },
 };
 
-export default Editor;
+export default CodeEditor;
