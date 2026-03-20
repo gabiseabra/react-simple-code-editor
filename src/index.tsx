@@ -10,6 +10,7 @@ type Props = React.HTMLAttributes<HTMLDivElement> & {
   onValueChange: (value: string) => void;
   padding?: Padding<number | string>;
   style?: React.CSSProperties;
+  styles?: Styles;
   tabSize?: number;
   value: string;
 
@@ -122,6 +123,7 @@ const Editor = React.forwardRef(function Editor(
     readOnly,
     required,
     style,
+    styles = defaultStyles,
     tabSize = 2,
     textareaClassName,
     textareaId,
@@ -589,7 +591,14 @@ const Editor = React.forwardRef(function Editor(
   );
 });
 
-const styles = {
+type Styles = {
+  container?: React.CSSProperties;
+  textarea?: React.CSSProperties;
+  highlight?: React.CSSProperties;
+  editor?: React.CSSProperties;
+};
+
+const defaultStyles: Styles = {
   container: {
     position: 'relative',
     textAlign: 'left',
@@ -635,6 +644,6 @@ const styles = {
     wordBreak: 'keep-all',
     overflowWrap: 'break-word',
   },
-} as const;
+};
 
 export default Editor;
