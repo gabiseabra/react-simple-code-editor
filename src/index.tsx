@@ -132,8 +132,8 @@ const Editor = React.forwardRef(function Editor(
   } = props;
 
   const styles = {
-    ...styleOverrides,
     ...defaultStyles,
+    ...styleOverrides,
   };
 
   const historyRef = React.useRef<History>({
