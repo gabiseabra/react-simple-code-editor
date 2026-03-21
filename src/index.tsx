@@ -5,6 +5,7 @@ type Padding<T> = T | { top?: T; right?: T; bottom?: T; left?: T };
 export type CodeEditorRef = {
   session: { history: CodeEditorHistory };
   selection: { start: number; end: number } | null;
+  readonly input: HTMLTextAreaElement | null;
 };
 
 export type CodeEditorProps = React.HTMLAttributes<HTMLDivElement> & {
@@ -561,6 +562,10 @@ export const CodeEditor = React.forwardRef(function Editor(
           if (selection) {
             inputRef.current.setSelectionRange(selection.start, selection.end);
           }
+        },
+
+        get input() {
+          return inputRef.current;
         },
       };
     },
