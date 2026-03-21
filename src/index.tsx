@@ -44,8 +44,8 @@ export type CodeEditorProps = React.HTMLAttributes<HTMLDivElement> & {
 
 export type CodeEditorRecord = {
   value: string;
-  selectionStart: number;
-  selectionEnd: number;
+  start: number;
+  end: number;
 };
 
 export type CodeEditorHistory = {
@@ -196,14 +196,10 @@ export const CodeEditor = React.forwardRef(function Editor(
           const re = /[^a-z0-9]([a-z0-9]+)$/i;
 
           // Get the previous line
-          const previous = getLines(last.value, last.selectionStart)
-            .pop()
-            ?.match(re);
+          const previous = getLines(last.value, last.start).pop()?.match(re);
 
           // Get the current line
-          const current = getLines(record.value, record.selectionStart)
-            .pop()
-            ?.match(re);
+          const current = getLines(record.value, record.start).pop()?.match(re);
 
           if (previous?.[1] && current?.[1]?.startsWith(previous[1])) {
             // The last word of the previous line and current line match
@@ -235,8 +231,8 @@ export const CodeEditor = React.forwardRef(function Editor(
 
     recordChange({
       value,
-      selectionStart,
-      selectionEnd,
+      start: selectionStart,
+      end: selectionEnd,
     });
   }, [recordChange]);
 
@@ -247,8 +243,8 @@ export const CodeEditor = React.forwardRef(function Editor(
 
     // Update values and selection state
     input.value = record.value;
-    input.selectionStart = record.selectionStart;
-    input.selectionEnd = record.selectionEnd;
+    input.selectionStart = record.start;
+    input.selectionEnd = record.end;
 
     onValueChange?.(record.value);
     setInternalValue(record.value);
@@ -262,8 +258,8 @@ export const CodeEditor = React.forwardRef(function Editor(
     if (last && input) {
       historyRef.current.stack[historyRef.current.offset] = {
         ...last,
-        selectionStart: input.selectionStart,
-        selectionEnd: input.selectionEnd,
+        start: input.selectionStart,
+        end: input.selectionEnd,
       };
     }
 
@@ -346,11 +342,11 @@ export const CodeEditor = React.forwardRef(function Editor(
             value: nextValue,
             // Move the start cursor if first line in selection was modified
             // It was modified only if it started with a tab
-            selectionStart: startLineText?.startsWith(tabCharacter)
+            start: startLineText?.startsWith(tabCharacter)
               ? selectionStart - tabCharacter.length
               : selectionStart,
             // Move the end cursor by total number of characters removed
-            selectionEnd: selectionEnd - (value.length - nextValue.length),
+            end: selectionEnd - (value.length - nextValue.length),
           });
         }
       } else if (selectionStart !== selectionEnd) {
@@ -373,13 +369,12 @@ export const CodeEditor = React.forwardRef(function Editor(
             .join('\n'),
           // Move the start cursor by number of characters added in first line of selection
           // Don't move it if it there was no text before cursor
-          selectionStart:
+          start:
             startLineText && /\S/.test(startLineText)
               ? selectionStart + tabCharacter.length
               : selectionStart,
           // Move the end cursor by total number of characters added
-          selectionEnd:
-            selectionEnd + tabCharacter.length * (endLine - startLine + 1),
+          end: selectionEnd + tabCharacter.length * (endLine - startLine + 1),
         });
       } else {
         const updatedSelection = selectionStart + tabCharacter.length;
@@ -391,8 +386,8 @@ export const CodeEditor = React.forwardRef(function Editor(
             tabCharacter +
             value.substring(selectionEnd),
           // Update caret position
-          selectionStart: updatedSelection,
-          selectionEnd: updatedSelection,
+          start: updatedSelection,
+          end: updatedSelection,
         });
       }
     } else if (e.key === 'Backspace') {
@@ -411,8 +406,8 @@ export const CodeEditor = React.forwardRef(function Editor(
             value.substring(0, selectionStart - tabCharacter.length) +
             value.substring(selectionEnd),
           // Update caret position
-          selectionStart: updatedSelection,
-          selectionEnd: updatedSelection,
+          start: updatedSelection,
+          end: updatedSelection,
         });
       }
     } else if (e.key === 'Enter') {
@@ -436,8 +431,8 @@ export const CodeEditor = React.forwardRef(function Editor(
               indent +
               value.substring(selectionEnd),
             // Update caret position
-            selectionStart: updatedSelection,
-            selectionEnd: updatedSelection,
+            start: updatedSelection,
+            end: updatedSelection,
           });
         }
       }
@@ -479,8 +474,8 @@ export const CodeEditor = React.forwardRef(function Editor(
             chars[1] +
             value.substring(selectionEnd),
           // Update caret position
-          selectionStart,
-          selectionEnd: selectionEnd + 2,
+          start: selectionStart,
+          end: selectionEnd + 2,
         });
       }
     } else if (
@@ -527,8 +522,8 @@ export const CodeEditor = React.forwardRef(function Editor(
     recordChange(
       {
         value,
-        selectionStart,
-        selectionEnd,
+        start: selectionStart,
+        end: selectionEnd,
       },
       true
     );
